@@ -1,9 +1,9 @@
 import numpy as np
-import torch
+from tqdm import tqdm
 import torch.optim as optim
 import torch.nn as nn
+from torch.autograd import Variable
 from lib import dataset
-from lib import utils
 from lib import models
 
 
@@ -28,21 +28,20 @@ class Trainer:
     def train_one_epoch(self, i_epoch):
         args = self.args
         losses = []
-        for i, dict_ in enumerate(self.train_dataloader):
+        total = int(len(self.train_dataloader.dataset) / self.args.batch_size)
+        self.model.zero_grad()
+        for i, dict_ in tqdm(enumerate(self.train_dataloader), total=total):
             label = dict_['label']
             words = dict_['words']
-            words = utils.pad_to_n(words,
-                                   self.args.max_sent_len,
-                                   self.vocab.w2i['<PAD>'])
 
-            label = torch.from_numpy(label).type(torch.LongTensor)
-            words = torch.from_numpy(words).type(torch.LongTensor)
+            label = Variable(label)
+            words = Variable(words)
             if args.use_cuda:
                 label = label.cuda()
                 words = words.cuda()
 
             preds = self.model(words)
-            loss = self.criteria(label, preds)
+            loss = self.criteria(preds, label)
             loss.backward()
             self.optimizer.step()
             losses.append(loss.data[0])

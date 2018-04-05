@@ -1,7 +1,10 @@
+import numpy as np
+import torch
 import torch.utils.data as data
 from torch.utils.data.sampler import RandomSampler
 from lib import agcorpus
 from lib import vocabulary
+from lib import utils
 
 
 class Dataset(data.Dataset):
@@ -11,6 +14,7 @@ class Dataset(data.Dataset):
         self.texts = texts
         self.vocab = vocab
         self.return_word_idx = return_word_idx
+        self.args = args
 
     def __len__(self):
         return len(self.labels)
@@ -18,8 +22,13 @@ class Dataset(data.Dataset):
     def __getitem__(self, idx):
         label = self.labels[idx]
         text = self.texts[idx]
+
         if self.return_word_idx:
             words, _ = self.vocab.encode(text)
+            words = utils.pad_to_n(words,
+                                   self.args.max_sent_len,
+                                   self.vocab.w2i['<PAD>'])
+            words = torch.from_numpy(np.array(words))
         else:
             _, words = self.vocab.encode()
         item_dict = {'label': label, 'words': words}
