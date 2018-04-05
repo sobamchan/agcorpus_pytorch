@@ -44,5 +44,5 @@ class Trainer:
             loss = self.criteria(preds, label)
             loss.backward()
             self.optimizer.step()
-            losses.append(loss.data[0])
+            losses.append(float(loss.data[0]))
         return np.mean(losses)

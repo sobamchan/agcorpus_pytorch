@@ -9,12 +9,16 @@ class Args:
         self.use_cuda = True
         self.max_sent_len = 20
         self.data_dir = './'
-        self.vocab_size = 75000
+        self.vocab_size = 50000
         self.embedding_dim = 300
         self.class_n = 4
+        self.epoch = 100
 
 
 if __name__ == '__main__':
     args = Args()
     trainer = Trainer(args)
-    trainer.train_one_epoch(1)
+
+    for i_epoch in range(1, args.epoch + 1):
+        loss = trainer.train_one_epoch(1)
+        print('%d th epoch: loss -> %f' % (i_epoch, loss))

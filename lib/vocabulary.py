@@ -31,10 +31,12 @@ class Vocabulary:
             vocab = list(vocab_counter.keys())
 
         w2i = {'<PAD>': 0, '<UNK>': 1, '<s>': 2, '</s>': 3}
+        vocab += list(w2i.keys())
         for word in vocab:
             if word not in w2i.keys():
                 w2i[word] = len(w2i)
         i2w = {idx: w for w, idx in w2i.items()}
+        assert len(vocab) == len(w2i) == len(i2w)
         return vocab, w2i, i2w
 
     def encode(self, sent):

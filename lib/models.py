@@ -39,7 +39,7 @@ class Model(nn.Module):
                                   padding_idx=vocab.w2i['<PAD>'])
         self.li1 = BottleLinear(args.max_sent_len * args.embedding_dim, 100)
         self.li2 = BottleLinear(100, args.class_n)
-        self.softmax = nn.Softmax()
+        self.softmax = nn.Softmax(dim=1)
 
     def forward(self, x):
         x = self.embed(x)
