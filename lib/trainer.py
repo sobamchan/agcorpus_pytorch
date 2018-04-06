@@ -75,5 +75,5 @@ class Trainer:
 
             _, preds_idxes = torch.max(preds, 1)
             correct = (preds_idxes == label).sum()
-            accuracies.append(correct / label.size(0))
+            accuracies.append(correct.data[0] / label.size(0))
         return np.mean(losses), np.mean(accuracies)

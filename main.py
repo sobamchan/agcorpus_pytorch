@@ -41,7 +41,7 @@ if __name__ == '__main__':
     # args = Args()
     args = get_args()
     os.environ['CUDA_VISIBLE_DEVICES'] = str(args.gpu_id)
-    print('id ', os.environ['CUDA_VISIBLE_DEVICES'])
+    print('using GPU id: ', os.environ['CUDA_VISIBLE_DEVICES'])
 
     if args.use_cuda and torch.cuda.is_available():
         args.use_cuda = True
