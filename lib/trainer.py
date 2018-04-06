@@ -18,7 +18,11 @@ class Trainer:
         self.test_dataloader = test_dataloader
         self.vocab = train_dataloader.dataset.vocab
 
-        model = models.Model(self.vocab, args)
+        if args.model == 'Linear':
+            model = models.Model(self.vocab, args)
+        elif args.model == 'CNN':
+            model = models.CNN(self.vocab, args)
+
         if args.use_cuda:
             self.model = model.cuda()
         else:
@@ -55,8 +59,7 @@ class Trainer:
         args = self.args
         losses = []
         accuracies = []
-        total = int(len(self.test_dataloader.dataset) / self.args.batch_size)
-        for i, dict_ in tqdm(enumerate(self.test_dataloader), total=total):
+        for i, dict_ in enumerate(self.test_dataloader):
             label = dict_['label']
             words = dict_['words']
 

@@ -1,3 +1,4 @@
+import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
@@ -57,14 +58,33 @@ class CNN(nn.Module):
         self.embed = nn.Embedding(len(vocab),
                                   args.embedding_dim,
                                   padding_idx=vocab.w2i['<PAD>'])
-        self.cnn = nn.Conv2d(1, 3, (2, self.args.embedding_dim))
-        self.pool = nn.MaxPool2d((1, 2))
-        self.softmax = nn.Softmax()
+
+        self.cnn_n2 = nn.Conv2d(1, 3, (2, self.args.embedding_dim))
+        self.cnn_n3 = nn.Conv2d(1, 3, (3, self.args.embedding_dim))
+        self.cnn_n4 = nn.Conv2d(1, 3, (4, self.args.embedding_dim))
+
+        self.linear = BottleLinear(1 * 3 * 3, args.class_n)
+        self.softmax = nn.Softmax(dim=1)
 
     def forward(self, x):
         x = self.embed(x)
         size = x.size()
-        x = x.view(size[0], 1, size[1], size[2])
-        x = self.cnn(x)
-        x = self.pool(x)
-        return self.softmax(x)
+        batch_size = size[0]
+        x = x.view(batch_size, 1, size[1], size[2])
+
+        x_n2 = self.cnn_n2(x)
+        x_n2 = F.max_pool2d(x_n2, (x_n2.size(2), 1))
+        x_n2 = x_n2.squeeze(3).view(batch_size, -1)
+
+        x_n3 = self.cnn_n3(x)
+        x_n3 = F.max_pool2d(x_n3, (x_n3.size(2), 1))
+        x_n3 = x_n3.squeeze(3).view(batch_size, -1)
+
+        x_n4 = self.cnn_n4(x)
+        x_n4 = F.max_pool2d(x_n4, (x_n4.size(2), 1))
+        x_n4 = x_n4.squeeze(3).view(batch_size, -1)
+
+        x_cat = torch.cat((x_n2, x_n3, x_n4), 1)
+        x_linear = self.linear(x_cat)
+
+        return self.softmax(x_linear)
