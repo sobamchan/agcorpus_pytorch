@@ -21,4 +21,6 @@ if __name__ == '__main__':
 
     for i_epoch in range(1, args.epoch + 1):
         loss = trainer.train_one_epoch(1)
-        print('%d th epoch: loss -> %f' % (i_epoch, loss))
+        print('%d th epoch: training loss -> %f' % (i_epoch, loss))
+        loss, acc = trainer.test()
+        print('test loss:  %f, test acc: %f' % (loss, acc))

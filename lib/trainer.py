@@ -1,5 +1,6 @@
 import numpy as np
 from tqdm import tqdm
+import torch
 import torch.optim as optim
 import torch.nn as nn
 from torch.autograd import Variable
@@ -29,6 +30,7 @@ class Trainer:
         args = self.args
         losses = []
         total = int(len(self.train_dataloader.dataset) / self.args.batch_size)
+        self.model.train()
         self.model.zero_grad()
         for i, dict_ in tqdm(enumerate(self.train_dataloader), total=total):
             label = dict_['label']
@@ -46,3 +48,28 @@ class Trainer:
             self.optimizer.step()
             losses.append(float(loss.data[0]))
         return np.mean(losses)
+
+    def test(self):
+        self.model.eval()
+        args = self.args
+        losses = []
+        accuracies = []
+        total = int(len(self.test_dataloader.dataset) / self.args.batch_size)
+        for i, dict_ in tqdm(enumerate(self.test_dataloader), total=total):
+            label = dict_['label']
+            words = dict_['words']
+
+            label = Variable(label, volatile=True)
+            words = Variable(words, volatile=True)
+            if args.use_cuda:
+                label = label.cuda()
+                words = words.cuda()
+
+            preds = self.model(words)
+            loss = self.criteria(preds, label)
+            losses.append(loss.data[0])
+
+            _, preds_idxes = torch.max(preds, 1)
+            correct = (preds_idxes == label).sum()
+            accuracies.append(correct / label.size(0))
+        return np.mean(losses), np.mean(accuracies)
